@@ -11,7 +11,7 @@ import { Response } from 'express';
 
 import { LoginDTO, RegisterDTO } from 'auth/contracts';
 import { AuthService } from 'auth/services';
-import { Public } from 'shared/decorators';
+import { GetCurrentUserToken, Public } from 'shared/decorators';
 
 @ApiTags('Auth')
 @Controller('/auth')
@@ -48,6 +48,21 @@ export class AuthController {
     } catch (err) {
       Logger.error(
         `Fail to execute request /auth/register: ${JSON.stringify(err)}`,
+      );
+      throw err;
+    }
+  }
+
+  @Post('/logout')
+  async logout(@Res() res: Response, @GetCurrentUserToken() token: string) {
+    try {
+      Logger.log(`[POST] - /auth/logout`);
+      await this.srv.logout(token);
+      res.removeHeader('Authorization');
+      return res.sendStatus(HttpStatus.NO_CONTENT);
+    } catch (err) {
+      Logger.error(
+        `Fail to execute request /auth/logout: ${JSON.stringify(err)}`,
       );
       throw err;
     }
