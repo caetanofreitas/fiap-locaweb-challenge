@@ -23,7 +23,7 @@ export class UserService implements IUserService {
 
   async UpsertPreferences(
     token: string,
-    preferences: UserPreferencesModel,
+    preferences: Partial<UserPreferencesModel>,
   ): Promise<boolean> {
     let user = await this.authService.validateUser(token);
 
@@ -35,7 +35,10 @@ export class UserService implements IUserService {
       preferences.id = (user.preferences as UserPreferencesModel).id;
     }
 
-    user.preferences = preferences;
+    user.preferences = {
+      ...(user.preferences as UserPreferencesModel),
+      ...preferences,
+    };
     return this.repo.upsertPreferences(user);
   }
 }

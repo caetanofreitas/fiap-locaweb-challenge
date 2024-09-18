@@ -34,6 +34,13 @@ export class EmailService implements IEmailService {
   ): Promise<{ emails: MessageModel[]; pages: number }> {
     const user = await this.authService.validateUser(token);
     const where = filter.getFilters();
+    console.log(where);
+    this.userService.UpsertPreferences(token, {
+      is_not_read_active: filter.read,
+      is_favorites_active: filter.favorite,
+      is_importants_active: filter.importants,
+      is_archived_active: filter.archived,
+    });
     const [emails, total] = await this.repo.getMessagesFromUser(
       user,
       where,
@@ -64,9 +71,7 @@ export class EmailService implements IEmailService {
     };
 
     await Promise.all(
-      [body.for, ...(body?.cc ?? [])].map((u) =>
-        this.sendEmail(u, baseMessage),
-      ),
+      [body.to, ...(body?.cc ?? [])].map((u) => this.sendEmail(u, baseMessage)),
     );
 
     return true;

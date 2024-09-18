@@ -22,7 +22,7 @@ export class EmailBody {
   @IsNotEmpty()
   @IsString()
   @IsEmail()
-  for: string;
+  to: string;
 
   @ApiProperty()
   @IsOptional()

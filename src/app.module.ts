@@ -23,6 +23,8 @@ import { EmailModule } from 'email/email.module';
       useFactory: (configService: ConfigService) => ({
         ...getDbConfig(configService),
         autoLoadEntities: true,
+        logging: true,
+        debug: true,
         useUTC: true,
       }),
       inject: [ConfigService],

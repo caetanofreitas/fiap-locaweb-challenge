@@ -33,7 +33,7 @@ export class UserPreferencesModel {
     type: 'varchar',
     transformer: {
       from: (value: string) => value?.split(',') ?? [],
-      to: (value: string[]) => value.join(),
+      to: (value: string[]) => value?.join() ?? null,
     },
   })
   markers: string[];
@@ -42,7 +42,7 @@ export class UserPreferencesModel {
     type: 'varchar',
     transformer: {
       from: (value: string) => value?.split(',') ?? [],
-      to: (value: string[]) => value.join(),
+      to: (value: string[]) => value?.join() ?? null,
     },
   })
   important_addr: string[];

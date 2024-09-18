@@ -45,6 +45,7 @@ export class EmailRepository
         },
         sender_id: {
           name: true,
+          profile_picture: true,
         },
       },
       where: {

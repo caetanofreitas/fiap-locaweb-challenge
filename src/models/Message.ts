@@ -26,7 +26,7 @@ export class MessageModel {
     type: 'varchar',
     transformer: {
       from: (value: string) => value?.split(',') ?? [],
-      to: (value: string[]) => value.join(),
+      to: (value: string[]) => value?.join() ?? null,
     },
   })
   markers: string[];
