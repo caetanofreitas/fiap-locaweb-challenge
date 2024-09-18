@@ -60,9 +60,11 @@ export class EmailService implements IEmailService {
       preview: this.getPreview(body.content),
     });
 
+    const markers = this.validateSpam(body.subject, body.content);
+
     const baseMessage = {
       send_date: body.sendDate,
-      markers: [],
+      markers,
       read: false,
       archived: false,
       favorite: false,
@@ -75,6 +77,79 @@ export class EmailService implements IEmailService {
     );
 
     return true;
+  }
+
+  private validateSpam(subject: string, content: string): string[] {
+    if (this.isSpam(subject, content)) {
+      return ['spam'];
+    }
+    return [];
+  }
+
+  private isSpam(subject: string, content: string): boolean {
+    const spamKeywords = [
+      'ganhe dinheiro',
+      'promoção',
+      'clique aqui',
+      'grátis',
+      'oportunidade',
+      'comprar agora',
+      'oferta',
+      'prêmio',
+      'seguro',
+      'congratulations',
+      'urgent',
+      'winner',
+      'cash',
+      'limited time',
+      'act now',
+      '100% free',
+    ];
+
+    // Regra 1: Verificar se o assunto ou conteúdo contém palavras-chave de SPAM
+    const lowerSubject = subject.toLowerCase();
+    const lowerContent = content.toLowerCase();
+
+    for (const keyword of spamKeywords) {
+      if (lowerSubject.includes(keyword) || lowerContent.includes(keyword)) {
+        return true;
+      }
+    }
+
+    // Regra 2: Verificar excesso de caracteres especiais (exclamações, cifrões, etc.)
+    const specialCharRegex = /[\!\$\#\%\&\*\@]{3,}/;
+    if (specialCharRegex.test(subject) || specialCharRegex.test(content)) {
+      return true;
+    }
+
+    // Regra 3: Verificar a presença de links encurtados ou URLs suspeitas
+    const urlRegex = /(http:\/\/|https:\/\/|www\.)/;
+    const shortLinkRegex = /(bit\.ly|goo\.gl|tinyurl\.com)/;
+
+    if (urlRegex.test(content) && shortLinkRegex.test(content)) {
+      return true;
+    }
+
+    // Regra 4: Verificar se o texto parece não estruturado (ex.: todo em letras maiúsculas)
+    if (
+      subject === subject.toUpperCase() ||
+      content === content.toUpperCase()
+    ) {
+      return true;
+    }
+
+    // Regra 5: Verificar por repetição de palavras no conteúdo
+    const words = content.split(/\s+/);
+    const wordCounts: { [key: string]: number } = {};
+    for (const word of words) {
+      const lowerWord = word.toLowerCase();
+      wordCounts[lowerWord] = (wordCounts[lowerWord] || 0) + 1;
+      if (wordCounts[lowerWord] > 5) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private getPreview(input: string): string {
